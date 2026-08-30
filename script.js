@@ -11,25 +11,54 @@ const closeModalBtn = document.getElementById("closeModal");
 
 countEl.textContent = `${TOTAL_POKEMON}匹`;
 
+const nameCache = new Map();
+
+async function fetchAllJapaneseNames() {
+  const query = `
+    query {
+      pokemon_v2_pokemonspeciesname(
+        where: {
+          language_id: { _eq: 1 }
+          pokemon_species_id: { _lte: ${TOTAL_POKEMON} }
+        }
+      ) {
+        name
+        pokemon_species_id
+      }
+    }
+  `;
+  const res = await fetch("https://beta.pokeapi.co/graphql/v1beta", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  if (!res.ok) throw new Error("Failed to fetch names");
+  const json = await res.json();
+  const rows = json.data?.pokemon_v2_pokemonspeciesname ?? [];
+  for (const row of rows) {
+    nameCache.set(row.pokemon_species_id, row.name);
+  }
+}
+
 function buildGrid() {
   const fragment = document.createDocumentFragment();
   for (let id = 1; id <= TOTAL_POKEMON; id++) {
+    const jaName = nameCache.get(id) || "";
     const card = document.createElement("div");
     card.className = "card";
-    card.dataset.id = id;
-    card.dataset.name = "";
+    card.dataset.id = String(id);
+    card.dataset.name = jaName;
     card.innerHTML = `
-      <img src="${SPRITE_BASE}/${id}.png" alt="No.${id}" loading="lazy">
+      <img src="${SPRITE_BASE}/${id}.png" alt="${jaName || `No.${id}`}" loading="lazy">
       <div class="num">No.${String(id).padStart(4, "0")}</div>
-      <div class="name"></div>
+      <div class="name">${jaName}</div>
     `;
     card.addEventListener("click", () => openDetail(id));
     fragment.appendChild(card);
   }
-  grid.appendChild(fragment);
+  grid.replaceChildren(fragment);
 }
 
-const nameCache = new Map();
 async function fetchJapaneseName(id) {
   if (nameCache.has(id)) return nameCache.get(id);
   const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
@@ -38,6 +67,16 @@ async function fetchJapaneseName(id) {
   const result = jaName ? jaName.name : data.name;
   nameCache.set(id, result);
   return result;
+}
+
+async function init() {
+  grid.innerHTML = `<div class="loading">読み込み中...</div>`;
+  try {
+    await fetchAllJapaneseNames();
+  } catch (err) {
+    console.error(err);
+  }
+  buildGrid();
 }
 
 async function openDetail(id) {
@@ -104,4 +143,4 @@ searchInput.addEventListener("input", () => {
   });
 });
 
-buildGrid();
+init();
