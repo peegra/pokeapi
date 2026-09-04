@@ -168,6 +168,57 @@ body {
   color: var(--muted);
 }
 
+.stats-table tr:not(:last-child) td {
+  padding-bottom: 8px;
+}
+
+/* タイトルと数値を同じ行に置くための設定。 */
+.stat-heading {
+  /* 子要素を横並びにする。 */
+  display: flex;
+  /* タイトルを左、数値を右へ移動する。 */
+  justify-content: space-between;
+  /* 文字の上下位置を自然にそろえる。 */
+  align-items: baseline;
+  /* タイトルとバーの間に少し余白を作る。 */
+  margin-bottom: 4px;
+  text-transform: capitalize;
+  color: var(--muted);
+}
+
+/* 数値を表示するためのバー全体。 */
+.stat-bar {
+  /* ブロック要素にして、親要素の横幅を使えるようにする。 */
+  display: block;
+  /* タイトルの左端から右端まで広げる。 */
+  width: 100%;
+  /* 細すぎず見やすい高さにする。 */
+  height: 10px;
+  /* 中の塗りつぶしが外側からはみ出さないようにする。 */
+  overflow: hidden;
+  /* バーの角を丸くする。 */
+  border-radius: 5px;
+  /* まだ貯まっていない部分の色。 */
+  background: #e5e7eb;
+}
+
+/* 実際にステータスの割合だけ色が付く部分。 */
+.stat-bar-fill {
+  display: block;
+  /* JavaScriptがアニメーション開始時に最終幅を設定する。 */
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  /* widthが変わると、0%からなめらかに伸びる。 */
+  transition: width 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stat-value {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
 .site-footer {
   text-align: center;
   padding: 16px;

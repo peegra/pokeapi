@@ -100,12 +100,30 @@ async function openDetail(id) {
       )
       .join("");
 
+    // APIから受け取った6種類のステータスを、画面用のHTMLへ変換する。
     const statsHtml = data.stats
+      // mapは、ステータス1件ごとに同じ形のHTMLを作る。
       .map(
-        (s) => `<tr><td>${s.stat.name}</td><td>${s.base_stat}</td></tr>`
+        (s) => `
+          <tr>
+            <td colspan="2">
+              <!-- タイトルと数値を、バーの上に左右へ分けて表示する。 -->
+              <div class="stat-heading">
+                <span>${s.stat.name}</span>
+                <span class="stat-value">${s.base_stat}</span>
+              </div>
+              <!-- 外側がバー全体、内側が数値に応じて伸びる部分。 -->
+              <div class="stat-bar" role="progressbar" aria-label="${s.stat.name}: ${s.base_stat}" aria-valuemin="1" aria-valuemax="255" aria-valuenow="${s.base_stat}">
+                <!-- アニメーション開始前はCSSで幅を0%にしておく。 -->
+                <span class="stat-bar-fill" data-value="${s.base_stat}"></span>
+              </div>
+            </td>
+          </tr>`
       )
+      // mapで作った各行を、1つのHTML文字列につなげる。
       .join("");
 
+    // 作成したステータスHTMLを、詳細ページのテーブルへ差し込む。
     modalBody.innerHTML = `
       <div class="detail-header">
         <img src="${SPRITE_BASE}/${id}.png" alt="${jaName}">
@@ -121,6 +139,20 @@ async function openDetail(id) {
         ${statsHtml}
       </table>
     `;
+
+    // HTMLが画面に描画された次のタイミングで、バーのアニメーションを始める。
+    requestAnimationFrame(() => {
+      // 6本のバーを1本ずつ取得する。
+      modalBody.querySelectorAll(".stat-bar-fill").forEach((fill, index) => {
+        // indexを使って、2本目以降の開始を少しずつ遅らせる。
+        window.setTimeout(() => {
+          // HTML属性に保存していたステータスの数値を、計算用の数値へ変換する。
+          const value = Number(fill.dataset.value);
+          // 最大値255に対する割合を計算し、バーの幅へ設定する。
+          fill.style.width = `${(value / 255) * 100}%`;
+        }, index * 90);
+      });
+    });
   } catch (err) {
     modalBody.innerHTML = `<div class="loading">読み込みに失敗しました。</div>`;
     console.error(err);
