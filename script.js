@@ -8,6 +8,29 @@ const searchInput = document.getElementById("search");
 const modal = document.getElementById("modal");
 const modalBody = document.getElementById("modalBody");
 const closeModalBtn = document.getElementById("closeModal");
+const modalContent = document.querySelector(".modal-content");
+
+// APIから返るタイプ名を、画面で使っている元のタイプカラーへ対応させる。
+const typeColors = {
+  normal: "#A8A878",
+  fire: "#F08030",
+  water: "#6890F0",
+  electric: "#F8D030",
+  grass: "#78C850",
+  ice: "#98D8D8",
+  fighting: "#C03028",
+  poison: "#A040A0",
+  ground: "#E0C068",
+  flying: "#A890F0",
+  psychic: "#F85888",
+  bug: "#A8B820",
+  rock: "#B8A038",
+  ghost: "#705898",
+  dragon: "#7038F8",
+  dark: "#705848",
+  steel: "#B8B8D0",
+  fairy: "#EE99AC",
+};
 
 countEl.textContent = `${TOTAL_POKEMON}匹`;
 
@@ -81,6 +104,8 @@ async function init() {
 
 async function openDetail(id) {
   modal.classList.remove("hidden");
+  modalContent.style.removeProperty("--type-color-1");
+  modalContent.style.removeProperty("--type-color-2");
   modalBody.innerHTML = `<div class="loading">読み込み中...</div>`;
   try {
     const res = await fetch(`${API_BASE}/${id}`);
@@ -99,6 +124,17 @@ async function openDetail(id) {
           `<span class="type-badge type-${t.type.name}">${t.type.name}</span>`
       )
       .join("");
+
+    // タイプの元色を50%白と混ぜ、淡い色にしてモーダルへ渡す。
+    const paleTypeColors = data.types.map((type) => {
+      const originalColor = typeColors[type.type.name] || "#ffffff";
+      return `color-mix(in srgb, ${originalColor}, white 50%)`;
+    });
+    modalContent.style.setProperty("--type-color-1", paleTypeColors[0]);
+    modalContent.style.setProperty(
+      "--type-color-2",
+      paleTypeColors[1] || paleTypeColors[0]
+    );
 
     // APIから受け取った6種類のステータスを、画面用のHTMLへ変換する。
     const statsHtml = data.stats

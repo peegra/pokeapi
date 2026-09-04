@@ -143,6 +143,28 @@ body {
   max-height: 85vh;
   overflow-y: auto;
   position: relative;
+  isolation: isolate;
+}
+
+/* タイプカラーを淡くした斜めの帯を、モーダルの背景として表示する。 */
+.modal-content::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0 34%,
+    var(--type-color-1, #fff) 34% 50%,
+    var(--type-color-2, #fff) 50% 66%,
+    transparent 66%
+  );
+}
+
+/* 背景の帯より前面に、詳細内容と閉じるボタンを表示する。 */
+.modal-content > * {
+  position: relative;
+  z-index: 1;
 }
 
 .close-btn {
