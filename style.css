@@ -23,6 +23,41 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
+  isolation: isolate;
+}
+
+/* ヘッダーと一覧の境目に、モンスターボールをイメージした黒い線を置く。 */
+.site-header::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 12px;
+  background: #242424;
+}
+
+/* 線の中央に、黒い縁取りのある白い円を重ねる。 */
+.site-header::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 72px;
+  height: 72px;
+  left: 50%;
+  /* 円の直径部分が、黒い線の中心と重なる位置。 */
+  bottom: -36px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 12px solid #242424;
+  background: #fff;
+}
+
+/* 円を背景として扱い、ヘッダー内の文字と検索欄を前面に表示する。 */
+.site-header > * {
+  position: relative;
+  z-index: 1;
 }
 
 .site-header h1 {
